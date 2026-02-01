@@ -1,6 +1,15 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
+// Hash password using SHA-256
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 const AuthContext = createContext({});
 
 export const useAuth = () => useContext(AuthContext);
@@ -36,27 +45,34 @@ export function AuthProvider({ children }) {
       setError(null);
       setLoading(true);
 
-      // Call the PostgreSQL function to verify login
-      const { data, error: rpcError } = await supabase.rpc('verify_user_login', {
-        user_email: email,
-        user_password: password,
-      });
+      // Hash the password and query the admins table
+      const hashedPassword = await hashPassword(password);
+      const { data, error: queryError } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('email', email)
+        .eq('password', hashedPassword)
+        .single();
 
-      if (rpcError) throw rpcError;
+      if (queryError) {
+        if (queryError.code === 'PGRST116') {
+          throw new Error('Invalid email or password');
+        }
+        throw queryError;
+      }
 
-      // Check the response from the function
-      if (!data.success) {
-        throw new Error(data.error);
+      if (!data) {
+        throw new Error('Invalid email or password');
       }
 
       // Create session user object
       const sessionUser = {
-        id: data.user.id,
-        email: data.user.email,
-        name: `${data.user.first_name} ${data.user.last_name}`.trim() || email,
-        firstName: data.user.first_name,
-        lastName: data.user.last_name,
-        role: data.user.role,
+        id: data.id,
+        email: data.email,
+        name: `${data.first_name} ${data.last_name}`.trim() || email,
+        firstName: data.first_name,
+        lastName: data.last_name,
+        role: 'admin',
       };
 
       // Save to session storage

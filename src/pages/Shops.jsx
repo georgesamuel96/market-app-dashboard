@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchShops, createShop, updateShop, deleteShop } from '../services/api';
 
 function Shops() {
+  const navigate = useNavigate();
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -124,21 +126,27 @@ function Shops() {
               </thead>
               <tbody>
                 {shops.map(shop => (
-                  <tr key={shop.id}>
+                  <tr key={shop.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/shops/${shop.id}`)}>
                     <td>{shop.id}</td>
                     <td>{shop.name}</td>
                     <td>{new Date(shop.created_at).toLocaleDateString()}</td>
                     <td>
                       <div className="actions">
                         <button
+                          className="btn btn-primary btn-sm"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/shops/${shop.id}`); }}
+                        >
+                          View
+                        </button>
+                        <button
                           className="btn btn-secondary btn-sm"
-                          onClick={() => handleOpenModal(shop)}
+                          onClick={(e) => { e.stopPropagation(); handleOpenModal(shop); }}
                         >
                           Edit
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(shop.id)}
+                          onClick={(e) => { e.stopPropagation(); handleDelete(shop.id); }}
                         >
                           Delete
                         </button>
