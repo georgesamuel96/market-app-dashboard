@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Customers from './pages/Customers';
 import Orders from './pages/Orders';
+import Shops from './pages/Shops';
 import Login from './pages/Login';
 
 function AppLayout({ children }) {
@@ -32,6 +33,10 @@ function AppLayout({ children }) {
           <NavLink to="/orders" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
             <span className="nav-icon">🛒</span>
             Orders
+          </NavLink>
+          <NavLink to="/shops" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <span className="nav-icon">🏪</span>
+            Shops
           </NavLink>
         </nav>
         <div className="sidebar-footer">
@@ -104,6 +109,16 @@ function App() {
           <ProtectedRoute>
             <AppLayout>
               <Orders />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/shops"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Shops />
             </AppLayout>
           </ProtectedRoute>
         }
