@@ -323,3 +323,43 @@ export const deleteShop = async (id) => {
   handleError(error);
   return { message: 'Shop deleted successfully' };
 };
+
+// ==================== SHOP PRODUCTS ====================
+
+export const fetchShopProducts = async (shopId) => {
+  const { data, error } = await supabase
+    .from('shop_products')
+    .select(`
+      id,
+      product_id,
+      created_at,
+      products (id, name, category, price, stock)
+    `)
+    .eq('shop_id', shopId)
+    .order('created_at', { ascending: false });
+  handleError(error);
+  return data.map(sp => ({
+    ...sp,
+    ...sp.products
+  }));
+};
+
+export const addProductToShop = async (shopId, productId) => {
+  const { data, error } = await supabase
+    .from('shop_products')
+    .insert([{ shop_id: shopId, product_id: productId }])
+    .select()
+    .single();
+  handleError(error);
+  return data;
+};
+
+export const removeProductFromShop = async (shopId, productId) => {
+  const { error } = await supabase
+    .from('shop_products')
+    .delete()
+    .eq('shop_id', shopId)
+    .eq('product_id', productId);
+  handleError(error);
+  return { message: 'Product removed from shop' };
+};

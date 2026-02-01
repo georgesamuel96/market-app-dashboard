@@ -6,7 +6,10 @@ import Products from './pages/Products';
 import Customers from './pages/Customers';
 import Orders from './pages/Orders';
 import Shops from './pages/Shops';
+import ShopDetail from './pages/ShopDetail';
 import Login from './pages/Login';
+import ShopLogin from './pages/ShopLogin';
+import ShopDashboard from './pages/ShopDashboard';
 
 function AppLayout({ children }) {
   const { userProfile, signOut } = useAuth();
@@ -60,19 +63,30 @@ function AppLayout({ children }) {
 
 function App() {
   const location = useLocation();
-  const isLoginPage = location.pathname === '/login';
+  const isLoginPage = location.pathname === '/admin/login' || location.pathname === '/login/shop';
+  const isShopDashboard = location.pathname.startsWith('/shop/');
 
   if (isLoginPage) {
     return (
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<Login />} />
+        <Route path="/login/shop" element={<ShopLogin />} />
+      </Routes>
+    );
+  }
+
+  if (isShopDashboard) {
+    return (
+      <Routes>
+        <Route path="/shop/dashboard" element={<ShopDashboard />} />
       </Routes>
     );
   }
 
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      <Route path="/admin/login" element={<Login />} />
+      <Route path="/login/shop" element={<ShopLogin />} />
       <Route
         path="/"
         element={
@@ -119,6 +133,16 @@ function App() {
           <ProtectedRoute>
             <AppLayout>
               <Shops />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/shops/:id"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ShopDetail />
             </AppLayout>
           </ProtectedRoute>
         }
