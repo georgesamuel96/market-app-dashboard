@@ -278,3 +278,48 @@ export const deleteOrder = async (id) => {
   handleError(error);
   return { message: 'Order deleted successfully' };
 };
+
+// ==================== SHOPS ====================
+
+export const fetchShops = async (params = {}) => {
+  let query = supabase.from('shops').select('*');
+
+  if (params.search) {
+    query = query.ilike('name', `%${params.search}%`);
+  }
+
+  query = query.order('id', { ascending: false });
+
+  const { data, error } = await query;
+  handleError(error);
+  return data;
+};
+
+export const fetchShop = async (id) => {
+  const { data, error } = await supabase.from('shops').select('*').eq('id', id).single();
+  handleError(error);
+  return data;
+};
+
+export const createShop = async (shopData) => {
+  const { data, error } = await supabase.from('shops').insert([shopData]).select().single();
+  handleError(error);
+  return data;
+};
+
+export const updateShop = async (id, shopData) => {
+  const { data, error } = await supabase
+    .from('shops')
+    .update({ ...shopData, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+  handleError(error);
+  return data;
+};
+
+export const deleteShop = async (id) => {
+  const { error } = await supabase.from('shops').delete().eq('id', id);
+  handleError(error);
+  return { message: 'Shop deleted successfully' };
+};
